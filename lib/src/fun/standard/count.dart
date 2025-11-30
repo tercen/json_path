@@ -11,5 +11,5 @@ class Count implements Fun1<Maybe, NodeList> {
   final name = 'count';
 
   @override
-  Maybe call(NodeList nodes) => Just(nodes.length);
+  Future<Maybe> call(NodeList nodes) async => Just(await nodes.length);
 }

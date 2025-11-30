@@ -12,6 +12,7 @@ import 'package:tercen_json_path/src/json_path.dart';
 import 'package:tercen_json_path/src/json_path_internal.dart';
 import 'package:tercen_json_path/src/node.dart';
 import 'package:tercen_json_path/src/ref_id_resolver.dart';
+import 'package:tercen_json_path/src/selector.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// A customizable JSONPath parser.
@@ -49,12 +50,14 @@ class JsonPathParser {
         : _parser;
 
     final expr = parser.parse(expression).value;
-    // Adapt Expression<NodeList> (which expects Node) to Selector (which expects Stream<Node>)
-    final selector = (Stream<Node> nodes) async* {
-      await for (final node in nodes) {
-        final result = await expr.call(node);
-        yield* result;
-      }
+    // Adapt Expression<NodeList> (which expects Node) to Selector (which expects NodeStream)
+    final Selector selector = (NodeStream nodes) {
+      return MultiNodeStream((() async* {
+        await for (final node in nodes) {
+          final result = await expr.call(node);
+          yield* result;
+        }
+      })());
     };
     return JsonPathInternal(expression, selector);
   }

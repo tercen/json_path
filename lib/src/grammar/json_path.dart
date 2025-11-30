@@ -140,7 +140,8 @@ class JsonPathGrammarDefinition
   Parser<Expression<NodeList>> _singularAbsPath() =>
       singularSegmentSequence
           .skip(before: char(r'$'), after: _segment().not())
-          .map((expr) => Expression((node) => expr.call(node.root)));
+          .map((Expression<NodeList> expr) =>
+              Expression<NodeList>((node) async => await expr.call(node.root)));
 
   Parser<Expression<NodeList>> _relPath() =>
       _segmentSequence().skip(before: char('@'));

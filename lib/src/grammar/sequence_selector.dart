@@ -23,8 +23,27 @@ NodeList Function(Node) sequenceSelector(Iterable<Selector> selectors) {
   return (Node node) => composed(SingularNodeStream(node));
 }
 
-// Singular version is same as regular (no distinction in stream world)
+// Singular version converts SingularSelectors to regular Selectors
+// SingularSelector: SingularNodeStream -> SingularNodeStream
+// Selector: NodeStream -> NodeStream
+// We can safely treat SingularNodeStream as NodeStream
 NodeList Function(Node) singularSequenceSelector(
   Iterable<SingularSelector> selectors,
-) =>
-    sequenceSelector(selectors);
+) {
+  // Convert SingularSelectors to Selectors by widening the type
+  final regularSelectors = selectors.map<Selector>((singularSel) {
+    return (NodeStream nodes) {
+      // If nodes is singular, apply the singular selector
+      if (nodes is SingularNodeStream) {
+        return singularSel(nodes);
+      }
+      // Otherwise, wrap in MultiNodeStream (shouldn't happen in practice)
+      return MultiNodeStream((() async* {
+        await for (final node in nodes) {
+          yield* singularSel(SingularNodeStream(node));
+        }
+      })());
+    };
+  });
+  return sequenceSelector(regularSelectors);
+}

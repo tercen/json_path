@@ -17,7 +17,7 @@ class JsonPathInternal implements JsonPath {
   /// Reads the given [json] object returning a Stream of all matches found.
   @override
   Stream<JsonPathMatch> read(json) =>
-      selector(Stream.value(Node(json))).map(NodeMatch.new);
+      selector(SingularNodeStream(Node(json))).map(NodeMatch.new);
 
   /// Reads the given [json] object returning a Stream of all values found.
   @override

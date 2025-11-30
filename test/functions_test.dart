@@ -11,27 +11,23 @@ void main() {
     functions: [const Reverse(), const Siblings(), const Xor()],
   );
   group('User-defined functions', () {
-    test('Fun<Nodes> in Nodes context', () {
-      expect(
-        parser
-            .parse(r'$..[?count(siblings(siblings(@))) > 4]')
-            .readValues(store)
-            .length,
-        equals(22),
-      );
+    test('Fun<Nodes> in Nodes context', () async {
+      final results = await parser
+          .parse(r'$..[?count(siblings(siblings(@))) > 4]')
+          .readValues(store)
+          .toList();
+      expect(results.length, equals(22));
     });
   });
 
   group('Logical', () {
-    test('xor', () {
+    test('xor', () async {
       final json = ['', 'a', 'ab', 'abc', 'aaa', 'bob'];
-      expect(
-        parser
-            .parse(r'$[?xor(search(@, "a"), search(@, "b"))]')
-            .readValues(json)
-            .toList(),
-        equals(['a', 'aaa', 'bob']),
-      );
+      final results = await parser
+          .parse(r'$[?xor(search(@, "a"), search(@, "b"))]')
+          .readValues(json)
+          .toList();
+      expect(results, equals(['a', 'aaa', 'bob']));
     });
   });
 

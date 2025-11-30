@@ -40,52 +40,46 @@ void runTestsInDirectory(String dirName, {JsonPathParser? parser}) {
               if (result is List) {
                 test(
                   'values',
-                  () => expect(
-                    jsonPath(selector).readValues(document),
-                    equals(result),
-                  ),
+                  () async {
+                    final values = await jsonPath(selector).readValues(document).toList();
+                    expect(values, equals(result));
+                  },
                 );
               }
               if (results is List) {
                 test(
                   'any of values',
-                  () => expect(
-                    jsonPath(selector).readValues(document),
-                    anyOf(results),
-                  ),
+                  () async {
+                    final values = await jsonPath(selector).readValues(document).toList();
+                    expect(values, anyOf(results));
+                  },
                 );
               }
               if (resultPaths is List) {
                 test(
                   'result_paths',
-                  () => expect(
-                    jsonPath(
-                      selector,
-                    ).read(document).map((e) => e.path).toList(),
-                    equals(resultPaths),
-                  ),
+                  () async {
+                    final paths = await jsonPath(selector).read(document).map((e) => e.path).toList();
+                    expect(paths, equals(resultPaths));
+                  },
                 );
               }
               if (resultsPaths is List) {
                 test(
                   'results_paths',
-                  () => expect(
-                    jsonPath(
-                      selector,
-                    ).read(document).map((e) => e.path).toList(),
-                    anyOf(resultsPaths),
-                  ),
+                  () async {
+                    final paths = await jsonPath(selector).read(document).map((e) => e.path).toList();
+                    expect(paths, anyOf(resultsPaths));
+                  },
                 );
               }
               if (pointers is List) {
                 test(
                   'result_pointers',
-                  () => expect(
-                    jsonPath(
-                      selector,
-                    ).read(document).map((e) => e.pointer.toString()).toList(),
-                    equals(pointers),
-                  ),
+                  () async {
+                    final ptrs = await jsonPath(selector).read(document).map((e) => e.pointer.toString()).toList();
+                    expect(ptrs, equals(pointers));
+                  },
                 );
               }
               if (invalid == true) {

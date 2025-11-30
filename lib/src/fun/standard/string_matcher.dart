@@ -1,5 +1,5 @@
 import 'package:iregexp/iregexp.dart';
-import 'package:json_path/src/fun/fun.dart';
+import 'package:tercen_json_path/src/fun/fun.dart';
 import 'package:maybe_just_nothing/maybe_just_nothing.dart';
 
 abstract class StringMatcher implements Fun2<bool, Maybe, Maybe> {

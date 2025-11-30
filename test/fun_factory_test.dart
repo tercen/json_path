@@ -1,5 +1,5 @@
-import 'package:json_path/src/fun/fun.dart';
-import 'package:json_path/src/fun/fun_factory.dart';
+import 'package:tercen_json_path/src/fun/fun.dart';
+import 'package:tercen_json_path/src/fun/fun_factory.dart';
 import 'package:maybe_just_nothing/maybe_just_nothing.dart';
 import 'package:test/test.dart';
 

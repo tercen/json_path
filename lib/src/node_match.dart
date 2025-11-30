@@ -1,7 +1,7 @@
-import 'package:json_path/json_path.dart';
-import 'package:json_path/src/node.dart';
-import 'package:json_path/src/normalized/index_selector.dart';
-import 'package:json_path/src/normalized/name_selector.dart';
+import 'package:tercen_json_path/json_path.dart';
+import 'package:tercen_json_path/src/node.dart';
+import 'package:tercen_json_path/src/normalized/index_selector.dart';
+import 'package:tercen_json_path/src/normalized/name_selector.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 
 class NodeMatch implements JsonPathMatch {

@@ -1,4 +1,4 @@
-import 'package:json_path/fun_sdk.dart';
+import 'package:tercen_json_path/fun_sdk.dart';
 
 /// Returns true if the value is a JSON array.
 class IsArray implements Fun1<bool, Maybe> {

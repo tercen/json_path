@@ -1,4 +1,4 @@
-import 'package:json_path/fun_sdk.dart';
+import 'package:tercen_json_path/fun_sdk.dart';
 
-typedef Selector = NodeList Function(Node node);
-typedef SingularSelector = SingularNodeList Function(Node node);
+typedef Selector = Stream<Node> Function(Stream<Node> nodes);
+typedef SingularSelector = Stream<Node> Function(Stream<Node> nodes);

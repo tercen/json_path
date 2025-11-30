@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:json_path/json_path.dart';
+import 'package:tercen_json_path/json_path.dart';
 
 void main() {
   final document = jsonDecode('''

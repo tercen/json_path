@@ -1,5 +1,5 @@
-import 'package:json_path/fun_extra.dart';
-import 'package:json_path/json_path.dart';
+import 'package:tercen_json_path/fun_extra.dart';
+import 'package:tercen_json_path/json_path.dart';
 
 import 'helper.dart';
 

@@ -1,4 +1,4 @@
-import 'package:json_path/src/fun/standard/string_matcher.dart';
+import 'package:tercen_json_path/src/fun/standard/string_matcher.dart';
 
 /// The standard `match()` function which returns `true`
 /// if the value matches the regex.

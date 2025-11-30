@@ -1,7 +1,11 @@
-import 'package:json_path/src/selector.dart';
+import 'package:tercen_json_path/src/selector.dart';
 
 Selector arraySliceSelector({int? start, int? stop, int? step}) =>
-    (node) sync* {
-      final slice = node.slice(start: start, stop: stop, step: step);
-      if (slice != null) yield* slice;
+    (nodes) async* {
+      await for (final node in nodes) {
+        final slice = node.slice(start: start, stop: stop, step: step);
+        if (slice != null) {
+          yield* slice;
+        }
+      }
     };

@@ -1,8 +1,8 @@
-import 'package:json_path/src/expression/expression.dart';
-import 'package:json_path/src/expression/nodes.dart';
-import 'package:json_path/src/fun/fun.dart';
-import 'package:json_path/src/fun/fun_call.dart';
-import 'package:json_path/src/fun/fun_validator.dart';
+import 'package:tercen_json_path/src/expression/expression.dart';
+import 'package:tercen_json_path/src/expression/nodes.dart';
+import 'package:tercen_json_path/src/fun/fun.dart';
+import 'package:tercen_json_path/src/fun/fun_call.dart';
+import 'package:tercen_json_path/src/fun/fun_validator.dart';
 import 'package:maybe_just_nothing/maybe_just_nothing.dart';
 
 class FunFactory {
@@ -44,10 +44,10 @@ class FunFactory {
       a0,
       value: f is Fun1<T, Maybe>,
       logical: f is Fun1<T, bool>,
-      node: f is Fun1<T, SingularNodeList>,
+      node: f is Fun1<T, NodeList>,
       nodes: f is Fun1<T, NodeList>,
     );
-    return cast0.map(f.call);
+    return cast0.map((v) => Future.value(f.call(v)));
   }
 
   Expression<T> _any2<T extends Object>(
@@ -60,17 +60,17 @@ class FunFactory {
       a0,
       value: f is Fun2<T, Maybe, Object>,
       logical: f is Fun2<T, bool, Object>,
-      node: f is Fun2<T, SingularNodeList, Object>,
+      node: f is Fun2<T, NodeList, Object>,
       nodes: f is Fun2<T, NodeList, Object>,
     );
     final cast1 = cast(
       a1,
       value: f is Fun2<T, Object, Maybe>,
       logical: f is Fun2<T, Object, bool>,
-      node: f is Fun2<T, Object, SingularNodeList>,
+      node: f is Fun2<T, Object, NodeList>,
       nodes: f is Fun2<T, Object, NodeList>,
     );
-    return cast0.merge(cast1, f.call);
+    return cast0.merge(cast1, (a, b) => Future.value(f.call(a, b)));
   }
 
   Fun1<T, Object> _getFun1<T extends Object>(String name) {
@@ -94,12 +94,12 @@ class FunFactory {
   }) {
     if (value) {
       if (arg is Expression<Maybe>) return arg;
-      if (arg is Expression<SingularNodeList>) return arg.map((v) => v.asValue);
+      if (arg is Expression<NodeList>) return arg.map((v) => v.asValueAsync);
     } else if (logical) {
       if (arg is Expression<bool>) return arg;
-      if (arg is Expression<NodeList>) return arg.map((v) => v.asLogical);
+      if (arg is Expression<NodeList>) return arg.map((v) => v.asLogicalAsync);
     } else if (node) {
-      if (arg is Expression<SingularNodeList>) return arg;
+      if (arg is Expression<NodeList>) return arg;
     } else if (nodes) {
       if (arg is Expression<NodeList>) return arg;
     }

@@ -1,24 +1,24 @@
-import 'package:json_path/src/expression/expression.dart';
-import 'package:json_path/src/expression/nodes.dart';
-import 'package:json_path/src/fun/fun_call.dart';
-import 'package:json_path/src/fun/fun_factory.dart';
-import 'package:json_path/src/grammar/array_index.dart';
-import 'package:json_path/src/grammar/array_slice.dart';
-import 'package:json_path/src/grammar/child_selector.dart';
-import 'package:json_path/src/grammar/comparison_expression.dart';
-import 'package:json_path/src/grammar/dot_name.dart';
-import 'package:json_path/src/grammar/filter_selector.dart';
-import 'package:json_path/src/grammar/fun_name.dart';
-import 'package:json_path/src/grammar/literal.dart';
-import 'package:json_path/src/grammar/negatable.dart';
-import 'package:json_path/src/grammar/parser_ext.dart';
-import 'package:json_path/src/grammar/select_all_recursively.dart';
-import 'package:json_path/src/grammar/sequence_selector.dart';
-import 'package:json_path/src/grammar/singular_segment_sequence.dart';
-import 'package:json_path/src/grammar/strings.dart';
-import 'package:json_path/src/grammar/union_selector.dart';
-import 'package:json_path/src/grammar/wildcard.dart';
-import 'package:json_path/src/selector.dart';
+import 'package:tercen_json_path/src/expression/expression.dart';
+import 'package:tercen_json_path/src/expression/nodes.dart';
+import 'package:tercen_json_path/src/fun/fun_call.dart';
+import 'package:tercen_json_path/src/fun/fun_factory.dart';
+import 'package:tercen_json_path/src/grammar/array_index.dart';
+import 'package:tercen_json_path/src/grammar/array_slice.dart';
+import 'package:tercen_json_path/src/grammar/child_selector.dart';
+import 'package:tercen_json_path/src/grammar/comparison_expression.dart';
+import 'package:tercen_json_path/src/grammar/dot_name.dart';
+import 'package:tercen_json_path/src/grammar/filter_selector.dart';
+import 'package:tercen_json_path/src/grammar/fun_name.dart';
+import 'package:tercen_json_path/src/grammar/literal.dart';
+import 'package:tercen_json_path/src/grammar/negatable.dart';
+import 'package:tercen_json_path/src/grammar/parser_ext.dart';
+import 'package:tercen_json_path/src/grammar/select_all_recursively.dart';
+import 'package:tercen_json_path/src/grammar/sequence_selector.dart';
+import 'package:tercen_json_path/src/grammar/singular_segment_sequence.dart';
+import 'package:tercen_json_path/src/grammar/strings.dart';
+import 'package:tercen_json_path/src/grammar/union_selector.dart';
+import 'package:tercen_json_path/src/grammar/wildcard.dart';
+import 'package:tercen_json_path/src/selector.dart';
 import 'package:maybe_just_nothing/maybe_just_nothing.dart';
 import 'package:petitparser/petitparser.dart';
 
@@ -36,7 +36,10 @@ class JsonPathGrammarDefinition
       .map((expr) => Expression((node) => expr.call(node.root)));
 
   Parser<Expression<NodeList>> _segmentSequence() =>
-      _segment().star().map(sequenceSelector).map(Expression.new);
+      _segment()
+          .star()
+          .map(sequenceSelector)
+          .map((fn) => Expression((node) => Future.value(fn(node))));
 
   Parser<Selector> _segment() => [
     dotName,
@@ -51,7 +54,7 @@ class JsonPathGrammarDefinition
   Parser<Selector> _recursion() => [wildcard, _union(), memberNameShorthand]
       .toChoiceParser()
       .skip(before: string('..'))
-      .map((value) => sequenceSelector([selectAllRecursively, value]));
+      .map((value) => sequenceSelectorComposed([selectAllRecursively, value]));
 
   Parser<Selector> _unionElement() => [
     arraySlice,
@@ -65,14 +68,14 @@ class JsonPathGrammarDefinition
       _logicalExpr().skip(before: string('?').trim()).map(filterSelector);
 
   Parser<Expression<bool>> _logicalExpr() => _logicalOrSequence().map(
-    (list) => list.reduce((a, b) => a.merge(b, (a, b) => a || b)),
+    (list) => list.reduce((a, b) => a.merge(b, (a, b) => Future.value(a || b))),
   );
 
   Parser<List<Expression<bool>>> _logicalOrSequence() =>
       _logicalAndExpr().toList(string('||'));
 
   Parser<Expression<bool>> _logicalAndExpr() => _logicalAndSequence().map(
-    (list) => list.reduce((a, b) => a.merge(b, (a, b) => a && b)),
+    (list) => list.reduce((a, b) => a.merge(b, (a, b) => Future.value(a && b))),
   );
 
   Parser<List<Expression<bool>>> _logicalAndSequence() =>
@@ -94,7 +97,7 @@ class JsonPathGrammarDefinition
       negatable([_existenceTest(), _logicalFunExpr()].toChoiceParser());
 
   Parser<Expression<bool>> _existenceTest() =>
-      _filterPath().map((value) => value.map((v) => v.asLogical));
+      _filterPath().map((value) => value.map((v) => v.asLogicalAsync));
 
   Parser<Expression<bool>> _logicalFunExpr() => _funCall(_fun.logical);
 
@@ -113,7 +116,7 @@ class JsonPathGrammarDefinition
     ref0(_logicalExpr),
   ].toChoiceParser().trim();
 
-  Parser<Expression<SingularNodeList>> _singularFilterPath() =>
+  Parser<Expression<NodeList>> _singularFilterPath() =>
       [ref0(_singularRelPath), ref0(_singularAbsPath)].toChoiceParser();
 
   Parser<Expression<Maybe>> _valueFunExpr() => _funCall(_fun.value);
@@ -122,14 +125,14 @@ class JsonPathGrammarDefinition
 
   Parser<Expression<Maybe>> _comparable() => [
     literal,
-    _singularFilterPath().map((expr) => expr.map((v) => v.asValue)),
+    _singularFilterPath().map((expr) => expr.map((v) => v.asValueAsync)),
     _valueFunExpr(),
-  ].toChoiceParser();
+  ].toChoiceParser().cast();
 
   Parser<Expression<NodeList>> _filterPath() =>
       [ref0(_relPath), ref0(_absPath)].toChoiceParser();
 
-  Parser<Expression<SingularNodeList>> _singularAbsPath() =>
+  Parser<Expression<NodeList>> _singularAbsPath() =>
       singularSegmentSequence
           .skip(before: char(r'$'), after: _segment().not())
           .map((expr) => Expression((node) => expr.call(node.root)));
@@ -137,6 +140,7 @@ class JsonPathGrammarDefinition
   Parser<Expression<NodeList>> _relPath() =>
       _segmentSequence().skip(before: char('@'));
 
-  Parser<Expression<SingularNodeList>> _singularRelPath() =>
-      singularSegmentSequence.skip(before: char('@'), after: _segment().not());
+  Parser<Expression<NodeList>> _singularRelPath() => singularSegmentSequence
+      .skip(before: char('@'), after: _segment().not())
+      .cast<Expression<NodeList>>();
 }

@@ -1,4 +1,4 @@
-import 'package:json_path/fun_sdk.dart';
+import 'package:tercen_json_path/fun_sdk.dart';
 
 /// Returns all siblings of the given nodes.
 class Siblings implements Fun1<NodeList, NodeList> {
@@ -8,7 +8,16 @@ class Siblings implements Fun1<NodeList, NodeList> {
   final name = 'siblings';
 
   @override
-  NodeList call(NodeList nodes) => nodes.expand(
-    (node) => node.parent?.children.where((it) => node != it) ?? [],
-  );
+  NodeList call(NodeList nodes) async* {
+    await for (final node in nodes) {
+      final parent = node.parent;
+      if (parent != null) {
+        await for (final sibling in parent.children) {
+          if (sibling != node) {
+            yield sibling;
+          }
+        }
+      }
+    }
+  }
 }

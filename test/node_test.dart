@@ -1,4 +1,4 @@
-import 'package:json_path/src/node.dart';
+import 'package:tercen_json_path/src/node.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 

@@ -1,4 +1,4 @@
-import 'package:json_path/src/grammar/slice_indices.dart';
+import 'package:tercen_json_path/src/grammar/slice_indices.dart';
 
 /// A JSON document node.
 class Node<T extends Object?> {
@@ -27,24 +27,34 @@ class Node<T extends Object?> {
 
   /// For a node whose value is an array, returns the slice of
   /// its children.
-  Iterable<Node>? slice({int? start, int? stop, int? step}) {
+  Stream<Node>? slice({int? start, int? stop, int? step}) {
     final v = value;
     if (v is List) {
-      return sliceIndices(
-        v.length,
-        start,
-        stop,
-        step ?? 1,
-      ).map((index) => _element(v, index));
+      return Stream.fromIterable(
+        sliceIndices(
+          v.length,
+          start,
+          stop,
+          step ?? 1,
+        ).map((index) => _element(v, index)),
+      );
     }
     return null;
   }
 
   /// All direct children of the node.
-  Iterable<Node> get children sync* {
+  Stream<Node> get children async* {
     final v = value;
-    if (v is Map) yield* v.keys.map((key) => _child(v, key));
-    if (v is List) yield* v.asMap().keys.map((index) => _element(v, index));
+    if (v is Map) {
+      for (final key in v.keys) {
+        yield _child(v, key);
+      }
+    }
+    if (v is List) {
+      for (final entry in v.asMap().entries) {
+        yield _element(v, entry.key);
+      }
+    }
   }
 
   /// Returns the JSON array element at the [offset] if it exists,

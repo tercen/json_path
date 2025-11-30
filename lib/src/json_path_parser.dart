@@ -1,15 +1,16 @@
-import 'package:json_path/src/expression/expression.dart';
-import 'package:json_path/src/expression/nodes.dart';
-import 'package:json_path/src/fun/fun.dart';
-import 'package:json_path/src/fun/fun_factory.dart';
-import 'package:json_path/src/fun/standard/count.dart';
-import 'package:json_path/src/fun/standard/length.dart';
-import 'package:json_path/src/fun/standard/match.dart';
-import 'package:json_path/src/fun/standard/search.dart';
-import 'package:json_path/src/fun/standard/value.dart';
-import 'package:json_path/src/grammar/json_path.dart';
-import 'package:json_path/src/json_path.dart';
-import 'package:json_path/src/json_path_internal.dart';
+import 'package:tercen_json_path/src/expression/expression.dart';
+import 'package:tercen_json_path/src/expression/nodes.dart';
+import 'package:tercen_json_path/src/fun/fun.dart';
+import 'package:tercen_json_path/src/fun/fun_factory.dart';
+import 'package:tercen_json_path/src/fun/standard/count.dart';
+import 'package:tercen_json_path/src/fun/standard/length.dart';
+import 'package:tercen_json_path/src/fun/standard/match.dart';
+import 'package:tercen_json_path/src/fun/standard/search.dart';
+import 'package:tercen_json_path/src/fun/standard/value.dart';
+import 'package:tercen_json_path/src/grammar/json_path.dart';
+import 'package:tercen_json_path/src/json_path.dart';
+import 'package:tercen_json_path/src/json_path_internal.dart';
+import 'package:tercen_json_path/src/node.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// A customizable JSONPath parser.
@@ -34,6 +35,15 @@ class JsonPathParser {
 
   /// Parses the JSONPath from s string [expression].
   /// Returns an instance of [JsonPath] or throws a [FormatException].
-  JsonPath parse(String expression) =>
-      JsonPathInternal(expression, _parser.parse(expression).value.call);
+  JsonPath parse(String expression) {
+    final expr = _parser.parse(expression).value;
+    // Adapt Expression<NodeList> (which expects Node) to Selector (which expects Stream<Node>)
+    final selector = (Stream<Node> nodes) async* {
+      await for (final node in nodes) {
+        final result = await expr.call(node);
+        yield* result;
+      }
+    };
+    return JsonPathInternal(expression, selector);
+  }
 }

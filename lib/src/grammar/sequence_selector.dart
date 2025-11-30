@@ -1,22 +1,30 @@
-import 'package:json_path/src/expression/nodes.dart';
-import 'package:json_path/src/selector.dart';
+import 'package:tercen_json_path/src/expression/nodes.dart';
+import 'package:tercen_json_path/src/node.dart';
+import 'package:tercen_json_path/src/selector.dart';
 
-Selector sequenceSelector(Iterable<Selector> selectors) =>
-    (node) => selectors.fold<_Filter>(
-      (v) => v,
-      (filter, selector) =>
-          (nodes) => filter(nodes).expand(selector),
-    )([node]);
+// Compose multiple selectors into a Selector (stream→stream)
+Selector sequenceSelectorComposed(Iterable<Selector> selectors) {
+  return (Stream<Node> nodes) {
+    Stream<Node> current = nodes;
 
-SingularSelector singularSequenceSelector(
+    // Apply each selector in sequence
+    for (final selector in selectors) {
+      current = selector(current);
+    }
+
+    return current;
+  };
+}
+
+// Compose multiple selectors into a per-node function (node→stream)
+// Used by grammar to build Expression<NodeList>
+NodeList Function(Node) sequenceSelector(Iterable<Selector> selectors) {
+  final composed = sequenceSelectorComposed(selectors);
+  return (Node node) => composed(Stream.value(node));
+}
+
+// Singular version is same as regular (no distinction in stream world)
+NodeList Function(Node) singularSequenceSelector(
   Iterable<SingularSelector> selectors,
 ) =>
-    (node) => selectors.fold<_SingularFilter>(
-      SingularNodeList.new,
-      (filter, selector) =>
-          (nodes) => SingularNodeList(filter(nodes).expand(selector)),
-    )([node]);
-
-typedef _Filter = NodeList Function(NodeList nodes);
-
-typedef _SingularFilter = SingularNodeList Function(NodeList nodes);
+    sequenceSelector(selectors);

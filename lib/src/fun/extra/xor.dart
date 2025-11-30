@@ -1,4 +1,4 @@
-import 'package:json_path/fun_sdk.dart';
+import 'package:tercen_json_path/fun_sdk.dart';
 
 class Xor implements Fun2<bool, bool, bool> {
   const Xor();

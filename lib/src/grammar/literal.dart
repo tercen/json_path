@@ -1,7 +1,7 @@
-import 'package:json_path/src/expression/expression.dart';
-import 'package:json_path/src/expression/static_expression.dart';
-import 'package:json_path/src/grammar/number.dart';
-import 'package:json_path/src/grammar/strings.dart';
+import 'package:tercen_json_path/src/expression/expression.dart';
+import 'package:tercen_json_path/src/expression/static_expression.dart';
+import 'package:tercen_json_path/src/grammar/number.dart';
+import 'package:tercen_json_path/src/grammar/strings.dart';
 import 'package:maybe_just_nothing/maybe_just_nothing.dart';
 import 'package:petitparser/parser.dart';
 

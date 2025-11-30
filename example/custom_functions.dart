@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:json_path/fun_sdk.dart';
-import 'package:json_path/json_path.dart';
+import 'package:tercen_json_path/fun_sdk.dart';
+import 'package:tercen_json_path/json_path.dart';
 
 /// This example shows how to create and use a custom function.
 void main() {

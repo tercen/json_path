@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:json_path/json_path.dart';
+import 'package:tercen_json_path/json_path.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 

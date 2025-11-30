@@ -1,4 +1,4 @@
-import 'package:json_path/src/expression/expression.dart';
+import 'package:tercen_json_path/src/expression/expression.dart';
 
 class FunCall {
   FunCall(this.name, this.args);

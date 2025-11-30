@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:json_path/fun_extra.dart';
-import 'package:json_path/json_path.dart';
+import 'package:tercen_json_path/fun_extra.dart';
+import 'package:tercen_json_path/json_path.dart';
 import 'package:test/test.dart';
 
 void main() {

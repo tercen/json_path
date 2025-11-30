@@ -1,5 +1,5 @@
-import 'package:json_path/fun_sdk.dart';
-import 'package:json_path/src/selector.dart';
+import 'package:tercen_json_path/fun_sdk.dart';
+import 'package:tercen_json_path/src/selector.dart';
 
 SingularSelector childSelector(String key) {
   if (key.runes.any(
@@ -7,5 +7,12 @@ SingularSelector childSelector(String key) {
   )) {
     throw const FormatException('Invalid UTF code units in childSelector.');
   }
-  return (node) => SingularNodeList.from(node.child(key));
+  return (nodes) async* {
+    await for (final node in nodes) {
+      final child = node.child(key);
+      if (child != null) {
+        yield child;
+      }
+    }
+  };
 }

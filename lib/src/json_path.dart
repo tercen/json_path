@@ -1,5 +1,5 @@
-import 'package:json_path/src/json_path_match.dart';
-import 'package:json_path/src/json_path_parser.dart';
+import 'package:tercen_json_path/src/json_path_match.dart';
+import 'package:tercen_json_path/src/json_path_parser.dart';
 
 /// A parsed JSONPath expression which can be applied to a JSON document.
 abstract interface class JsonPath {
@@ -9,9 +9,9 @@ abstract interface class JsonPath {
   /// Throws [FormatException] if the [expression] can not be parsed.
   factory JsonPath(String expression) => JsonPathParser().parse(expression);
 
-  /// Reads the given [json] object returning an Iterable of all matches found.
-  Iterable<JsonPathMatch> read(dynamic json);
+  /// Reads the given [json] object returning a Stream of all matches found.
+  Stream<JsonPathMatch> read(dynamic json);
 
-  /// Reads the given [json] object returning an Iterable of all values found.
-  Iterable<Object?> readValues(dynamic json);
+  /// Reads the given [json] object returning a Stream of all values found.
+  Stream<Object?> readValues(dynamic json);
 }

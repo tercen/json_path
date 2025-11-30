@@ -1,15 +1,19 @@
-import 'package:json_path/fun_sdk.dart';
+import 'package:tercen_json_path/fun_sdk.dart';
 
-/// Returns the index under which the node referenced by the argument
+/// Returns the index at which the node referenced by the argument
 /// is found in the parent array.
 /// If the parent is not an array, returns [Nothing].
 /// If the argument does not reference a single node, returns [Nothing].
-class Index implements Fun1<Maybe, SingularNodeList> {
+///
+/// TODO: Requires async refactoring to work with Stream<Node>
+class Index implements Fun1<Maybe, NodeList> {
   const Index();
 
   @override
   final name = 'index';
 
   @override
-  Maybe call(SingularNodeList nodes) => Just(nodes.node?.index).type<int>();
+  Maybe call(NodeList nodes) {
+    throw UnimplementedError('index() requires async Stream support');
+  }
 }

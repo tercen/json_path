@@ -1,7 +1,8 @@
-name: json_path
-version: 0.8.0
-description: "Implementation of RFC 9535 - JSONPath: Query Expressions for JSON. Reads and writes values in parsed JSON objects using queries like `$.store.book[2].price`."
-homepage: "https://github.com/f3ath/jessie"
+name: tercen_json_path
+version: 0.8.0+tercen1.0.0
+description: "Tercen fork of RFC 9535 JSONPath implementation with async/stream support and @ dereferencing syntax for RefId resolution."
+homepage: "https://github.com/tercen/json_path"
+repository: "https://github.com/tercen/json_path"
 
 environment:
   sdk: ^3.8.0

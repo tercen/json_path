@@ -1,6 +1,6 @@
-import 'package:json_path/src/expression/nodes.dart';
-import 'package:json_path/src/fun/fun.dart';
-import 'package:json_path/src/grammar/fun_name.dart';
+import 'package:tercen_json_path/src/expression/nodes.dart';
+import 'package:tercen_json_path/src/fun/fun.dart';
+import 'package:tercen_json_path/src/grammar/fun_name.dart';
 import 'package:maybe_just_nothing/maybe_just_nothing.dart';
 import 'package:petitparser/petitparser.dart';
 

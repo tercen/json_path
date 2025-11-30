@@ -1,6 +1,17 @@
-import 'package:json_path/src/node.dart';
+import 'package:tercen_json_path/src/node.dart';
+import 'package:tercen_json_path/src/selector.dart';
 
-Iterable<Node> selectAllRecursively(Node node) sync* {
+// Per-node recursive descent
+Stream<Node> _selectAllRecursivelyPerNode(Node node) async* {
   yield node;
-  yield* node.children.expand(selectAllRecursively);
+  await for (final child in node.children) {
+    yield* _selectAllRecursivelyPerNode(child);
+  }
 }
+
+// Selector that applies recursive descent to each input node
+Selector selectAllRecursively = (Stream<Node> nodes) async* {
+  await for (final node in nodes) {
+    yield* _selectAllRecursivelyPerNode(node);
+  }
+};

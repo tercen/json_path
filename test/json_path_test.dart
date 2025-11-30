@@ -1,4 +1,4 @@
-import 'package:json_path/json_path.dart';
+import 'package:tercen_json_path/json_path.dart';
 import 'package:test/test.dart';
 
 void main() {

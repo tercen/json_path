@@ -1,4 +1,7 @@
-import 'package:json_path/src/selector.dart';
+import 'package:tercen_json_path/src/selector.dart';
 
-Selector unionSelector(Iterable<Selector> selectors) =>
-    (node) => selectors.expand((s) => s(node));
+Selector unionSelector(Iterable<Selector> selectors) => (nodes) async* {
+      for (final selector in selectors) {
+        yield* selector(nodes);
+      }
+    };

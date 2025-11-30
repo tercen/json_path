@@ -1,4 +1,4 @@
-import 'package:json_path/fun_sdk.dart';
+import 'package:tercen_json_path/fun_sdk.dart';
 
 /// Reverses the string.
 class Reverse implements Fun1<Maybe, Maybe> {

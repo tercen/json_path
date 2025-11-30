@@ -1,5 +1,5 @@
-import 'package:json_path/src/grammar/array_slice_selector.dart';
-import 'package:json_path/src/grammar/number.dart';
+import 'package:tercen_json_path/src/grammar/array_slice_selector.dart';
+import 'package:tercen_json_path/src/grammar/number.dart';
 import 'package:petitparser/petitparser.dart';
 
 final _colon = char(':').trim();

@@ -39,8 +39,7 @@
     {
       "name": "key(), non singular",
       "selector": "$[?key(@.*) == 'a']",
-      "invalid_selector": true,
-      "skip": "Parse-time validation requires Expression-level singularity types. Current runtime validation via SingularNodeStream type is sufficient."
+      "invalid_selector": true
     }
   ]
 }

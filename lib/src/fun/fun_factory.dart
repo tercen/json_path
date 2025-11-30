@@ -40,6 +40,17 @@ class FunFactory {
 
   Expression<T> _any1<T extends Object>(String name, Expression a0) {
     final f = _getFun1<T>(name);
+
+    // Parse-time singularity validation for SingularNodeStream functions
+    if (f is Fun1<T, SingularNodeStream>) {
+      if (a0.singularity == QuerySingularity.plural) {
+        throw FormatException(
+          'Function "$name" requires a singular query argument, '
+          'but argument has plural singularity',
+        );
+      }
+    }
+
     final cast0 = cast(
       a0,
       value: f is Fun1<T, Maybe>,
@@ -60,6 +71,25 @@ class FunFactory {
     Expression a1,
   ) {
     final f = _getFun2<T>(name);
+
+    // Parse-time singularity validation for SingularNodeStream arguments
+    if (f is Fun2<T, SingularNodeStream, Object>) {
+      if (a0.singularity == QuerySingularity.plural) {
+        throw FormatException(
+          'Function "$name" requires a singular query for first argument, '
+          'but argument has plural singularity',
+        );
+      }
+    }
+    if (f is Fun2<T, Object, SingularNodeStream>) {
+      if (a1.singularity == QuerySingularity.plural) {
+        throw FormatException(
+          'Function "$name" requires a singular query for second argument, '
+          'but argument has plural singularity',
+        );
+      }
+    }
+
     final cast0 = cast(
       a0,
       value: f is Fun2<T, Maybe, Object>,

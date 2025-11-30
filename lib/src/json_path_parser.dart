@@ -11,6 +11,7 @@ import 'package:tercen_json_path/src/grammar/json_path.dart';
 import 'package:tercen_json_path/src/json_path.dart';
 import 'package:tercen_json_path/src/json_path_internal.dart';
 import 'package:tercen_json_path/src/node.dart';
+import 'package:tercen_json_path/src/ref_id_resolver.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// A customizable JSONPath parser.
@@ -35,8 +36,19 @@ class JsonPathParser {
 
   /// Parses the JSONPath from s string [expression].
   /// Returns an instance of [JsonPath] or throws a [FormatException].
-  JsonPath parse(String expression) {
-    final expr = _parser.parse(expression).value;
+  ///
+  /// Optional [resolver] enables @ dereferencing syntax.
+  JsonPath parse(String expression, {RefIdResolver? resolver}) {
+    // If resolver is provided, build a custom parser with it
+    // Otherwise use the cached parser
+    final parser = resolver != null
+        ? JsonPathGrammarDefinition(
+            FunFactory(_stdFun.followedBy(const [])),
+            resolver,
+          ).build()
+        : _parser;
+
+    final expr = parser.parse(expression).value;
     // Adapt Expression<NodeList> (which expects Node) to Selector (which expects Stream<Node>)
     final selector = (Stream<Node> nodes) async* {
       await for (final node in nodes) {

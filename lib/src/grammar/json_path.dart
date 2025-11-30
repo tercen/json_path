@@ -6,6 +6,7 @@ import 'package:tercen_json_path/src/grammar/array_index.dart';
 import 'package:tercen_json_path/src/grammar/array_slice.dart';
 import 'package:tercen_json_path/src/grammar/child_selector.dart';
 import 'package:tercen_json_path/src/grammar/comparison_expression.dart';
+import 'package:tercen_json_path/src/grammar/dereference.dart';
 import 'package:tercen_json_path/src/grammar/dot_name.dart';
 import 'package:tercen_json_path/src/grammar/filter_selector.dart';
 import 'package:tercen_json_path/src/grammar/fun_name.dart';
@@ -18,15 +19,17 @@ import 'package:tercen_json_path/src/grammar/singular_segment_sequence.dart';
 import 'package:tercen_json_path/src/grammar/strings.dart';
 import 'package:tercen_json_path/src/grammar/union_selector.dart';
 import 'package:tercen_json_path/src/grammar/wildcard.dart';
+import 'package:tercen_json_path/src/ref_id_resolver.dart';
 import 'package:tercen_json_path/src/selector.dart';
 import 'package:maybe_just_nothing/maybe_just_nothing.dart';
 import 'package:petitparser/petitparser.dart';
 
 class JsonPathGrammarDefinition
     extends GrammarDefinition<Expression<NodeList>> {
-  JsonPathGrammarDefinition(this._fun);
+  JsonPathGrammarDefinition(this._fun, [this._resolver]);
 
   final FunFactory _fun;
+  final RefIdResolver? _resolver;
 
   @override
   Parser<Expression<NodeList>> start() => _absPath().end();
@@ -42,6 +45,8 @@ class JsonPathGrammarDefinition
           .map((fn) => Expression((node) => Future.value(fn(node))));
 
   Parser<Selector> _segment() => [
+    // Try dereference (.name@Target) before plain name (.name)
+    dereferenceParser(_resolver).skip(before: char('.')),
     dotName,
     wildcard.skip(before: char('.')),
     ref0(_union),

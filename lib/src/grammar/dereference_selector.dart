@@ -55,12 +55,8 @@ Selector dereferenceSelector(
 
         if (targetObject != null) {
           // Create a new node for the dereferenced object
-          // The parent is the original node, key is the @ dereference notation
-          yield Node._(
-            targetObject,
-            node,
-            key: '$fieldName@$targetKind',
-          );
+          // Note: We create a root node since Node._ is private
+          yield Node(targetObject);
         }
         // If null, the document wasn't found - skip it
       } catch (e) {

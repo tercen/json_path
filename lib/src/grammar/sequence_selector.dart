@@ -4,8 +4,8 @@ import 'package:tercen_json_path/src/selector.dart';
 
 // Compose multiple selectors into a Selector (stream→stream)
 Selector sequenceSelectorComposed(Iterable<Selector> selectors) {
-  return (Stream<Node> nodes) {
-    Stream<Node> current = nodes;
+  return (NodeStream nodes) {
+    NodeStream current = nodes;
 
     // Apply each selector in sequence
     for (final selector in selectors) {
@@ -20,7 +20,7 @@ Selector sequenceSelectorComposed(Iterable<Selector> selectors) {
 // Used by grammar to build Expression<NodeList>
 NodeList Function(Node) sequenceSelector(Iterable<Selector> selectors) {
   final composed = sequenceSelectorComposed(selectors);
-  return (Node node) => composed(Stream.value(node));
+  return (Node node) => composed(SingularNodeStream(node));
 }
 
 // Singular version is same as regular (no distinction in stream world)

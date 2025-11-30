@@ -26,44 +26,46 @@ Selector dereferenceSelector(
   String targetKind,
   RefIdResolver? resolver,
 ) {
-  return (Stream<Node> nodes) async* {
-    if (resolver == null) {
-      // No resolver available - skip dereferencing
-      // This allows parsing @ syntax without requiring a resolver
-      return;
-    }
-
-    await for (final node in nodes) {
-      if (node.value is! Map) {
-        continue; // Can only dereference from objects
+  return (NodeStream nodes) {
+    return MultiNodeStream((() async* {
+      if (resolver == null) {
+        // No resolver available - skip dereferencing
+        // This allows parsing @ syntax without requiring a resolver
+        return;
       }
 
-      final map = node.value as Map;
-      final refIdValue = map[fieldName];
-
-      if (refIdValue == null) {
-        continue; // Field doesn't exist
-      }
-
-      if (refIdValue is! String) {
-        continue; // RefId must be a string
-      }
-
-      // Perform async dereference
-      try {
-        final targetObject = await resolver.dereference(refIdValue, targetKind);
-
-        if (targetObject != null) {
-          // Create a new node for the dereferenced object
-          // Note: We create a root node since Node._ is private
-          yield Node(targetObject);
+      await for (final node in nodes) {
+        if (node.value is! Map) {
+          continue; // Can only dereference from objects
         }
-        // If null, the document wasn't found - skip it
-      } catch (e) {
-        // If dereference fails, skip this node
-        // Could log error here in production
-        continue;
+
+        final map = node.value as Map;
+        final refIdValue = map[fieldName];
+
+        if (refIdValue == null) {
+          continue; // Field doesn't exist
+        }
+
+        if (refIdValue is! String) {
+          continue; // RefId must be a string
+        }
+
+        // Perform async dereference
+        try {
+          final targetObject = await resolver.dereference(refIdValue, targetKind);
+
+          if (targetObject != null) {
+            // Create a new node for the dereferenced object
+            // Note: We create a root node since Node._ is private
+            yield Node(targetObject);
+          }
+          // If null, the document wasn't found - skip it
+        } catch (e) {
+          // If dereference fails, skip this node
+          // Could log error here in production
+          continue;
+        }
       }
-    }
+    })());
   };
 }

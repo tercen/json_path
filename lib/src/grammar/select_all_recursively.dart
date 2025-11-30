@@ -10,8 +10,10 @@ Stream<Node> _selectAllRecursivelyPerNode(Node node) async* {
 }
 
 // Selector that applies recursive descent to each input node
-Selector selectAllRecursively = (Stream<Node> nodes) async* {
-  await for (final node in nodes) {
-    yield* _selectAllRecursivelyPerNode(node);
-  }
+Selector selectAllRecursively = (NodeStream nodes) {
+  return MultiNodeStream((() async* {
+    await for (final node in nodes) {
+      yield* _selectAllRecursivelyPerNode(node);
+    }
+  })());
 };

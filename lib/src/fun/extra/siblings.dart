@@ -8,16 +8,18 @@ class Siblings implements Fun1<NodeList, NodeList> {
   final name = 'siblings';
 
   @override
-  NodeList call(NodeList nodes) async* {
-    await for (final node in nodes) {
-      final parent = node.parent;
-      if (parent != null) {
-        await for (final sibling in parent.children) {
-          if (sibling != node) {
-            yield sibling;
+  NodeList call(NodeList nodes) {
+    return MultiNodeStream((() async* {
+      await for (final node in nodes) {
+        final parent = node.parent;
+        if (parent != null) {
+          await for (final sibling in parent.children) {
+            if (sibling != node) {
+              yield sibling;
+            }
           }
         }
       }
-    }
+    })());
   }
 }

@@ -1,7 +1,11 @@
 import 'package:tercen_json_path/src/node.dart';
+import 'package:tercen_json_path/src/expression/node_stream.dart';
 import 'package:maybe_just_nothing/maybe_just_nothing.dart';
 
-typedef NodeList = Stream<Node>;
+// Re-export NodeStream types so they're available through fun_sdk
+export 'package:tercen_json_path/src/expression/node_stream.dart';
+
+typedef NodeList = NodeStream;
 
 // Helper class to wrap a stream with sync-accessible metadata
 class _StreamWithInfo {

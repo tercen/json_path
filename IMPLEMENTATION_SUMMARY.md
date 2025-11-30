@@ -6,7 +6,7 @@ Successfully forked and extended the `f3ath/jessie` JSONPath library to create a
 
 **Repository**: `tercen/json_path`
 **Branch**: `tercen-extensions`
-**Test Results**: **268 passing, 3 skipped (100% functional pass rate)**
+**Test Results**: **271 passing, 0 skipped, 0 failing (100% complete)** ✅
 
 ## Major Achievements
 
@@ -44,8 +44,8 @@ final query = JsonPath(
 - Full test coverage (5/6 tests passing)
 - Comprehensive documentation and examples
 
-**Test Results**: 5 passing, 1 skipped
-**Known Limitation**: @ in filter expressions (skipped - requires relative path support)
+**Test Results**: 6 passing, 0 skipped ✅
+**Status**: Fully implemented including @ in filter expressions
 
 ### 3. Async Function Support ✅
 
@@ -159,29 +159,32 @@ final path = JsonPath(
 ### Final Statistics
 
 - **Total tests**: 271
-- **Passing**: 268
-- **Skipped**: 3
-- **Failing**: 0
-- **Functional pass rate**: 100%
+- **Passing**: 271 ✅
+- **Skipped**: 0 ✅
+- **Failing**: 0 ✅
+- **Completion rate**: 100% ✅
+- **All features fully implemented and tested**
 
-### Skipped Tests (Documented Async Architecture Trade-offs)
+### Previously Skipped Tests (Now Resolved)
 
-1. **@ in filter expressions** (1 skipped)
-   - **Issue**: Parser cannot distinguish `@.field` (current node) from `field@Kind` in filter contexts
-   - **Example**: `$[?@.refId@TargetKind.name == 'value']`
-   - **Reason**: Requires extending grammar for relative path @ contexts
-   - **Workaround**: Use @ outside of filter expressions
+1. **@ in filter expressions** ✅ RESOLVED
+   - **Was**: Parser couldn't support `@.field@Kind` in filter contexts
+   - **Example**: `$[?@.operatorId@Operator.category == 'ML']`
+   - **Solution**: Added dereferencing support to `singularSegmentSequence`
+   - **Status**: Fully working, test un-skipped
    - **File**: `test/dereference_test.dart`
 
-2. **key(@.*) singularity validation** (1 skipped)
-   - **Issue**: Cannot validate query singularity at parse time in async architecture
-   - **Example**: `$[?key(@.*) == 'a']` - `@.*` returns multiple nodes, but `key()` expects one
-   - **Reason**: Original used `SingularNodeList` type for compile-time validation, removed in async conversion
-   - **Trade-off**: Runtime validation for async streaming benefits
+2. **key(@.*) singularity validation** ✅ RESOLVED
+   - **Was**: Couldn't validate query singularity at parse time
+   - **Example**: `$[?key(@.*) == 'a']` - should fail (plural query, singular function)
+   - **Solution**: Implemented `QuerySingularity` metadata for parse-time validation
+   - **Status**: Now throws `FormatException` at parse time
    - **File**: `test/cases/extra/key.json`
 
-3. **index(@.*) singularity validation** (1 skipped)
-   - **Issue**: Same as key() - singularity validation moved to runtime
+3. **index(@.*) singularity validation** ✅ RESOLVED
+   - **Was**: Same issue as key()
+   - **Solution**: Same `QuerySingularity` metadata system
+   - **Status**: Parse-time validation working
    - **Example**: `$[?index(@.*) == 0]`
    - **Reason**: Async architecture uses uniform `Stream<Node>` type
    - **Trade-off**: Runtime validation for memory efficiency and async support
@@ -257,11 +260,12 @@ final projects = await path.read(data).toList();
 
 ### Potential Improvements
 
-1. **@ in filters** - Extend parser to support relative path @ syntax
-2. **Batched resolution** - Optimize resolver to batch multiple RefId lookups
-3. **Nested @ chaining** - Support `refId@Type1.refId@Type2`
-4. **Cache layer** - Add optional caching for resolved documents
-5. **Multi-stream support** - Explore broadcast streams for union operations
+1. ~~**@ in filters**~~ ✅ **COMPLETED** - Now fully supported
+2. ~~**Parse-time singularity validation**~~ ✅ **COMPLETED** - QuerySingularity metadata implemented
+3. **Batched resolution** - Optimize resolver to batch multiple RefId lookups
+4. **Nested @ chaining** - Support and test `refId@Type1.refId@Type2`
+5. **Cache layer** - Add optional caching for resolved documents
+6. **Multi-stream support** - Explore broadcast streams for union operations
 
 ### Compatibility
 

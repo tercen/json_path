@@ -10,7 +10,7 @@ environment:
 dependencies:
   iregexp: ^0.2.0
   maybe_just_nothing: ^0.5.2
-  petitparser: ^7.0.0
+  petitparser: '>=5.0.0 <8.0.0'
   rfc_6901: ^0.2.0
 
 dev_dependencies:

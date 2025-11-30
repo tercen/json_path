@@ -151,19 +151,22 @@ Fun1<Maybe, SingularNodeList>  // Enforced at parse time
 //   "The getter 'node' isn't defined for type 'MultiNodeStream'"
 ```
 
-**Alternative to un-skip**: We could add **runtime validation** in the FunFactory that checks if a function expects SingularNodeStream and throws FormatException if passed MultiNodeStream. This would make the tests pass while keeping runtime validation.
+**Alternative to un-skip**: ✅ **IMPLEMENTED** - Added `QuerySingularity` metadata system with parse-time validation in FunFactory.
 
-### Test 3: `@` in filter expressions
+### Test 3: `@` in filter expressions ✅ RESOLVED
 
-**What it tests**: `@` dereferencing syntax in filter context like `$[?@.field@Kind == 'value']`
+**What it tested**: `@` dereferencing syntax in filter context like `$[?@.operatorId@Operator.category == 'ML']`
 
-**Why skipped**:
-- Parser limitation - can't distinguish `@.field` (current node) from `field@Kind` (dereferencing) in filter contexts
-- Requires extending grammar for relative path @ contexts
-- Known limitation, documented
-- Workaround: Use @ outside filters
+**Why it was skipped**:
+- Parser limitation - `singularSegmentSequence` didn't support dereferencing
+- Required extending grammar for relative path @ contexts
 
-**Status**: Independent of NodeStream hierarchy - would require grammar changes.
+**Solution implemented**:
+- Moved `singularSegmentSequence` into grammar class to access `_resolver`
+- Added dereferencing support to `_singularSegment()` parser
+- Now fully supports chained property access after dereferencing in filters
+
+**Status**: ✅ **FULLY WORKING** - Test un-skipped and passing.
 
 ## Runtime Validation Enhancement (Optional)
 

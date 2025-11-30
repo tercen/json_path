@@ -194,20 +194,35 @@ class BatchingResolver implements RefIdResolver {
 - **Memory efficient**: No need to materialize entire result sets
 - **Cancellable**: Can stop iteration early
 
+## Advanced Features
+
+### @ Dereferencing in Filter Expressions ✅
+
+Filter expressions now support @ dereferencing with chained property access:
+
+```dart
+// ✅ Filter by dereferenced properties
+$.steps[?@.operatorId@Operator.category == 'ML']
+
+// ✅ Chain multiple segments after dereferencing
+$.steps[?@.operatorId@Operator.config.maxIterations > 100]
+
+// ✅ Complex filter conditions
+$.workflows[0].steps[?@.operatorId@Operator.category == 'ML' && @.status == 'active']
+```
+
 ## Known Limitations
 
-1. **@ in Filter Expressions** - Not yet supported
-   ```dart
-   // ❌ Doesn't work
-   $[?@.operatorId@Operator.category == 'ML']
-
-   // ✅ Workaround: dereference first, filter after
-   ```
-
-2. **Path Information** - Dereferenced nodes lose parent/key information
+1. **Path Information** - Dereferenced nodes lose parent/key information
    (created as root nodes)
 
-3. **No Circular Reference Detection** - Recursive dereferences not prevented
+2. **No Circular Reference Detection** - Recursive dereferences not prevented
+
+3. **Nested @ Chains** - Not extensively tested
+   ```dart
+   // May work but not guaranteed
+   $.projectId@Project.ownerId@User.name
+   ```
 
 ## Development
 

@@ -202,23 +202,55 @@ $.workflows[*].steps[*].operatorId@Operator
 
 3. **Parallel Resolution**: The implementation uses async streams, so multiple resolutions can happen concurrently
 
+## Advanced Usage
+
+### @ Dereferencing in Filter Expressions ✅
+
+Filter expressions fully support @ dereferencing with chained property access:
+
+```dart
+// Filter by dereferenced properties
+$.steps[?@.operatorId@Operator.category == 'ML']
+
+// Chain multiple segments after dereferencing
+$.workflows[0].steps[?@.operatorId@Operator.category == 'ML']
+
+// Complex conditions with dereferencing
+$.steps[?@.operatorId@Operator.config.maxIterations > 100 && @.status == 'active']
+```
+
+**Example with full context:**
+
+```dart
+// JSON document
+{
+  "workflows": [{
+    "steps": [
+      {"id": "step_1", "operatorId": "op_mean"},
+      {"id": "step_2", "operatorId": "op_pca"}
+    ]
+  }]
+}
+
+// Resolver returns:
+// op_mean: {"kind": "Operator", "category": "Math"}
+// op_pca: {"kind": "Operator", "category": "ML"}
+
+// Query
+final path = JsonPath(
+  r"$.workflows[0].steps[?@.operatorId@Operator.category == 'ML']",
+  resolver: resolver,
+);
+
+// Result: Only step_2 (the one with ML operator)
+[{"id": "step_2", "operatorId": "op_pca"}]
+```
+
 ## Limitations
 
 ### Current Limitations
 
-1. **@ in Filter Expressions** (Not yet supported)
-   ```dart
-   // This doesn't work yet
-   $.steps[?@.operatorId@Operator.category == 'ML']
-   ```
-
-   **Workaround**: Dereference first, filter after
-   ```dart
-   final ops = await JsonPath(r'$.steps[*].operatorId@Operator').read(data).toList();
-   final mlOps = ops.where((op) => (op.value as Map)['category'] == 'ML');
-   ```
-
-2. **Nested @ Chains** (Not tested)
+1. **Nested @ Chains** (Not extensively tested)
    ```dart
    // May or may not work
    $.workflow.projectId@Project.ownerId@User.name

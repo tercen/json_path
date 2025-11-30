@@ -9,10 +9,12 @@ abstract interface class Fun {
 /// - [bool]
 /// - [Maybe]
 /// - [NodeList]
+/// The call method may return R or Future<R> for async support.
 abstract interface class Fun1<R extends Object, T extends Object> extends Fun {
   /// Applies the given arguments.
   /// This method MUST throw an [Exception] on invalid args.
-  R call(T arg);
+  /// May return R or Future<R> for async operations.
+  dynamic call(T arg);
 }
 
 /// A named function with two arguments.
@@ -20,6 +22,7 @@ abstract interface class Fun1<R extends Object, T extends Object> extends Fun {
 /// - [bool]
 /// - [Maybe]
 /// - [NodeList]
+/// The call method may return R or Future<R> for async support.
 abstract interface class Fun2<
   R extends Object,
   T1 extends Object,
@@ -28,5 +31,6 @@ abstract interface class Fun2<
     extends Fun {
   /// Applies the given arguments.
   /// This method MUST throw an [Exception] on invalid args.
-  R call(T1 first, T2 second);
+  /// May return R or Future<R> for async operations.
+  dynamic call(T1 first, T2 second);
 }

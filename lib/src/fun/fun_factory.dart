@@ -47,7 +47,11 @@ class FunFactory {
       node: f is Fun1<T, NodeList>,
       nodes: f is Fun1<T, NodeList>,
     );
-    return cast0.map((v) => Future.value(f.call(v)));
+    return cast0.map((v) async {
+      final result = f.call(v);
+      // If result is already a Future, await it; otherwise wrap it
+      return result is Future<T> ? await result : result;
+    });
   }
 
   Expression<T> _any2<T extends Object>(
@@ -70,7 +74,11 @@ class FunFactory {
       node: f is Fun2<T, Object, NodeList>,
       nodes: f is Fun2<T, Object, NodeList>,
     );
-    return cast0.merge(cast1, (a, b) => Future.value(f.call(a, b)));
+    return cast0.merge(cast1, (a, b) async {
+      final result = f.call(a, b);
+      // If result is already a Future, await it; otherwise wrap it
+      return result is Future<T> ? await result : result;
+    });
   }
 
   Fun1<T, Object> _getFun1<T extends Object>(String name) {

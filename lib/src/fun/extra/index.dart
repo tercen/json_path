@@ -4,8 +4,6 @@ import 'package:tercen_json_path/fun_sdk.dart';
 /// is found in the parent array.
 /// If the parent is not an array, returns [Nothing].
 /// If the argument does not reference a single node, returns [Nothing].
-///
-/// TODO: Requires async refactoring to work with Stream<Node>
 class Index implements Fun1<Maybe, NodeList> {
   const Index();
 
@@ -13,7 +11,10 @@ class Index implements Fun1<Maybe, NodeList> {
   final name = 'index';
 
   @override
-  Maybe call(NodeList nodes) {
-    throw UnimplementedError('index() requires async Stream support');
+  Future<Maybe> call(NodeList nodes) async {
+    final list = await nodes.toList();
+    if (list.length != 1) return const Nothing();
+    final node = list.first;
+    return Just(node.index).type<int>();
   }
 }

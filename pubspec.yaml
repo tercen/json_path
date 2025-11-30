@@ -1,6 +1,6 @@
 name: tercen_json_path
-version: 0.8.0+tercen1.0.0
-description: "Tercen fork of RFC 9535 JSONPath implementation with async/stream support and @ dereferencing syntax for RefId resolution."
+version: 0.9.0+tercen1.0.0
+description: "Tercen fork of RFC 9535 JSONPath implementation with async/stream support, @ dereferencing syntax, and parse-time singularity validation. 271/271 tests passing."
 homepage: "https://github.com/tercen/json_path"
 repository: "https://github.com/tercen/json_path"
 

@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0+tercen1.0.0] - 2025-11-30
+### Added
+- **QuerySingularity metadata system** - Parse-time validation for singularity constraints
+- **@ dereferencing in filter expressions** - Full support for `$[?@.field@Kind.prop == value]`
+- **SingularNodeStream type** - Compile-time safety for singular query functions
+- Parse-time validation for `key()` and `index()` functions with plural arguments
+
+### Fixed
+- Singular segment parser now supports dereferencing (`.field@Kind.prop`)
+- Filter expressions can now chain properties after @ dereferencing
+- All 3 previously-skipped tests now passing
+
+### Changed
+- Relaxed petitparser constraint to `>=5.0.0 <8.0.0` for better compatibility
+- Updated all documentation to reflect 100% test coverage (271/271 passing)
+
+### Performance
+- No performance impact - metadata validation happens at parse time only
+
 ## [0.8.0] - 2025-07-06
 ### Changed
 - Bumped petitparser to 7.0

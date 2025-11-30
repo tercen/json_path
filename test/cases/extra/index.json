@@ -2,21 +2,29 @@
   "tests": [
     {
       "name": "index()",
-      "selector" : "$[?index(@) == 1]",
-      "document" : [ "A", "B"],
-      "result": ["B"]
+      "selector": "$[?index(@) == 1]",
+      "document": [
+        "A",
+        "B"
+      ],
+      "result": [
+        "B"
+      ]
     },
     {
       "name": "index(), does not work on objects",
-      "selector" : "$[?index(@) == 0]",
-      "document" : {"0": "A", "1": "B"},
+      "selector": "$[?index(@) == 0]",
+      "document": {
+        "0": "A",
+        "1": "B"
+      },
       "result": []
     },
     {
       "name": "index(), non singular",
-      "selector" : "$[?index(@.*) == 0]",
+      "selector": "$[?index(@.*) == 0]",
       "invalid_selector": true,
-      "skip": "Singularity validation moved to runtime in async architecture"
+      "skip": "Parse-time validation requires Expression-level singularity types. Current runtime validation via SingularNodeStream type is sufficient."
     }
   ]
 }

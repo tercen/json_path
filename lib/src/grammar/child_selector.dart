@@ -10,7 +10,7 @@ Selector childSelector(String key) {
   return (NodeStream nodes) {
     return MultiNodeStream((() async* {
       await for (final node in nodes) {
-        final child = node.child(key);
+        final child = await node.child(key);
         if (child != null) {
           yield child;
         }

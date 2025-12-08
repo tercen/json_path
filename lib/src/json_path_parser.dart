@@ -13,6 +13,9 @@ import 'package:tercen_json_path/src/json_path_internal.dart';
 import 'package:tercen_json_path/src/node.dart';
 import 'package:tercen_json_path/src/ref_id_resolver.dart';
 import 'package:tercen_json_path/src/selector.dart';
+import 'package:tercen_json_path/src/virtual_hierarchy_analyzer.dart';
+import 'package:tercen_json_path/src/virtual_hierarchy_resolver.dart';
+import 'package:tercen_json_path/src/virtual_hierarchy_plan.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// A customizable JSONPath parser.
@@ -22,9 +25,10 @@ class JsonPathParser {
       functions.isEmpty ? _standard : JsonPathParser._(functions);
 
   JsonPathParser._(Iterable<Fun> functions)
-    : _parser = JsonPathGrammarDefinition(
-        FunFactory(_stdFun.followedBy(functions)),
-      ).build();
+      : _parser = JsonPathGrammarDefinition(
+          FunFactory(_stdFun.followedBy(functions)),
+        ).build(),
+        _analyzer = VirtualHierarchyAnalyzer();
 
   /// The standard instance is pre-cached to speed up parsing when only
   /// the standard built-in functions are used.
@@ -34,6 +38,7 @@ class JsonPathParser {
   static const _stdFun = <Fun>[Count(), Length(), Match(), Search(), Value()];
 
   final Parser<Expression<NodeList>> _parser;
+  final VirtualHierarchyAnalyzer _analyzer;
 
   /// Parses the JSONPath from s string [expression].
   /// Returns an instance of [JsonPath] or throws a [FormatException].
@@ -59,6 +64,21 @@ class JsonPathParser {
         }
       })());
     };
-    return JsonPathInternal(expression, selector);
+
+    // Analyze hierarchy requirements if we have a virtual resolver
+    VirtualHierarchyPlan? plan;
+    VirtualHierarchyResolver? virtualResolver;
+
+    if (resolver is VirtualHierarchyResolver) {
+      plan = _analyzer.analyze(expression);
+      virtualResolver = resolver;
+    }
+
+    return JsonPathInternal(
+      expression,
+      selector,
+      resolver: virtualResolver,
+      hierarchyPlan: plan,
+    );
   }
 }

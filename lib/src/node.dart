@@ -1,18 +1,41 @@
 import 'package:tercen_json_path/src/grammar/slice_indices.dart';
+import 'package:tercen_json_path/src/virtual_hierarchy_resolver.dart';
 
 /// A JSON document node.
 class Node<T extends Object?> {
   /// Creates an instance of the root node of the JSON document [value].
-  Node(this.value) : parent = null, key = null, index = null;
+  Node(
+    this.value, {
+    VirtualHierarchyResolver? resolver,
+    VirtualHierarchyContext? context,
+  })  : parent = null,
+        key = null,
+        index = null,
+        _resolver = resolver,
+        _context = context;
 
   /// Creates an instance of a child node.
-  Node._(this.value, this.parent, {this.key, this.index});
+  Node._(
+    this.value,
+    this.parent, {
+    this.key,
+    this.index,
+    VirtualHierarchyResolver? resolver,
+    VirtualHierarchyContext? context,
+  })  : _resolver = resolver ?? parent?._resolver,
+        _context = context ?? parent?._context;
 
   /// The node value.
   final T value;
 
   /// The parent node.
   final Node? parent;
+
+  /// Virtual hierarchy resolver for lazy collection fetching
+  final VirtualHierarchyResolver? _resolver;
+
+  /// Context for virtual hierarchy resolution
+  final VirtualHierarchyContext? _context;
 
   /// The root node of the entire document.
   Node get root => parent?.root ?? this;
@@ -59,7 +82,7 @@ class Node<T extends Object?> {
 
   /// Returns the JSON array element at the [offset] if it exists,
   /// otherwise returns null. Negative offsets are supported.
-  Node? element(int offset) {
+  Future<Node?> element(int offset) async {
     final v = value;
     if (v is List) {
       final index = offset < 0 ? v.length + offset : offset;
@@ -70,16 +93,156 @@ class Node<T extends Object?> {
 
   /// Returns the JSON object child at the [key] if it exists,
   /// otherwise returns null.
-  Node? child(String key) {
+  Future<Node?> child(String key) async {
     final v = value;
+
+    // Try to get from existing data first (fast path)
     if (v is Map && v.containsKey(key)) return _child(v, key);
+
+    // Try virtual collection resolution (slow path)
+    if (_resolver != null && _isVirtualCollection(key)) {
+      final context = VirtualHierarchyContext(
+        parentCollection: _inferCollectionFromNode(),
+        parentId: _extractIdFromNode(),
+      );
+
+      final docs = await _resolver!.resolveCollection(key, context);
+
+      if (docs.isNotEmpty) {
+        // Create virtual child with fetched data
+        return _createVirtualChild(key, docs);
+      }
+    }
+
     return null;
   }
 
-  Node _element(List list, int index) =>
-      Node._(list[index], this, index: index);
+  Node _element(List list, int index) => Node._(
+        list[index],
+        this,
+        index: index,
+        resolver: _resolver,
+        context: _context,
+      );
 
-  Node _child(Map map, String key) => Node._(map[key], this, key: key);
+  Node _child(Map map, String key) => Node._(
+        map[key],
+        this,
+        key: key,
+        resolver: _resolver,
+        context: _context,
+      );
+
+  /// Check if a key represents a virtual collection
+  bool _isVirtualCollection(String key) {
+    return const [
+      'projects',
+      'teams',
+      'workflows',
+      'schemas',
+      'files',
+      'folders',
+      'operators',
+      'tasks',
+      'users',
+    ].contains(key);
+  }
+
+  /// Infer collection type from current node
+  String? _inferCollectionFromNode() {
+    final v = value;
+    if (v is Map) {
+      final kind = v['kind'] as String?;
+      return _mapKindToCollection(kind);
+    }
+    return null;
+  }
+
+  /// Map document kind to collection name
+  String? _mapKindToCollection(String? kind) {
+    if (kind == null) return null;
+
+    switch (kind) {
+      case 'Project':
+        return 'projects';
+      case 'Team':
+        return 'teams';
+      case 'Workflow':
+        return 'workflows';
+      case 'TableSchema':
+      case 'CubeQueryTableSchema':
+      case 'ComputedTableSchema':
+        return 'schemas';
+      case 'FileDocument':
+        return 'files';
+      case 'FolderDocument':
+        return 'folders';
+      case 'Operator':
+      case 'GitOperator':
+      case 'DockerOperator':
+      case 'ROperator':
+      case 'WebAppOperator':
+        return 'operators';
+      case 'Task':
+      case 'ProjectTask':
+      case 'RunComputationTask':
+      case 'SaveComputationResultTask':
+      case 'ComputationTask':
+      case 'CubeQueryTask':
+      case 'CSVTask':
+      case 'RunWorkflowTask':
+      case 'RunWebAppTask':
+      case 'ImportGitWorkflowTask':
+      case 'ExportWorkflowTask':
+      case 'ImportGitDatasetTask':
+      case 'ExportTableTask':
+      case 'TestOperatorTask':
+      case 'GitProjectTask':
+      case 'LibraryTask':
+      case 'GlTask':
+      case 'CreateGitOperatorTask':
+        return 'tasks';
+      case 'User':
+        return 'users';
+      default:
+        return null;
+    }
+  }
+
+  /// Extract ID from current node
+  String? _extractIdFromNode() {
+    final v = value;
+    if (v is Map) {
+      return v['id'] as String?;
+    }
+    return null;
+  }
+
+  /// Create a virtual child node with fetched documents
+  Node _createVirtualChild(String key, List<Map<String, dynamic>> docs) {
+    // Inject the fetched documents into parent's value
+    final parentValue = value as Map;
+    final updatedValue = Map<String, dynamic>.from(parentValue);
+    updatedValue[key] = docs;
+
+    // Create a new node with updated value and return the child
+    final updatedParent = Node._(
+      updatedValue,
+      parent,
+      key: this.key,
+      index: index,
+      resolver: _resolver,
+      context: _context,
+    );
+
+    return Node._(
+      docs,
+      updatedParent,
+      key: key,
+      resolver: _resolver,
+      context: _context,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

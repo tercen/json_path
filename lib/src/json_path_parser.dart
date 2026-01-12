@@ -16,6 +16,7 @@ import 'package:tercen_json_path/src/selector.dart';
 import 'package:tercen_json_path/src/virtual_hierarchy_analyzer.dart';
 import 'package:tercen_json_path/src/virtual_hierarchy_resolver.dart';
 import 'package:tercen_json_path/src/virtual_hierarchy_plan.dart';
+import 'package:tercen_json_path/src/virtual_property_resolver.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// A customizable JSONPath parser.
@@ -44,7 +45,13 @@ class JsonPathParser {
   /// Returns an instance of [JsonPath] or throws a [FormatException].
   ///
   /// Optional [resolver] enables @ dereferencing syntax.
-  JsonPath parse(String expression, {RefIdResolver? resolver}) {
+  /// Optional [virtualPropertyResolver] enables computed properties like
+  /// `parentSteps`, `childSteps`, etc.
+  JsonPath parse(
+    String expression, {
+    RefIdResolver? resolver,
+    VirtualPropertyResolver? virtualPropertyResolver,
+  }) {
     // If resolver is provided, build a custom parser with it
     // Otherwise use the cached parser
     final parser = resolver != null
@@ -79,6 +86,7 @@ class JsonPathParser {
       selector,
       resolver: virtualResolver,
       hierarchyPlan: plan,
+      virtualPropertyResolver: virtualPropertyResolver,
     );
   }
 }

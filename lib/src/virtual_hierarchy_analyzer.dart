@@ -7,13 +7,19 @@ class VirtualHierarchyAnalyzer {
     final requirements = <CollectionRequirement>[];
 
     // Pattern: .collection[filter] or .collection[*]
+    // This pattern captures the entire filter content for further parsing
     // Examples:
     // - .projects[?@.id == 'proj_456']
     // - .workflows[*]
     // - .teams[?@.name == 'Test']
-    // Matches: .collection[*] or .collection[?@.prop == 'value']
+    // - .projectDocuments[?@.id=='xxx' || @.id=='yyy']
     final segmentPattern = RegExp(
-      r"\.(\w+)\[(?:(\*)|(?:\?@\.(\w+)\s*(==|!=|>|<|>=|<=)\s*'([^']+)'))?]",
+      r"\.(\w+)\[(\*|\?[^\]]+)?]",
+    );
+
+    // Pattern for individual filter conditions
+    final filterConditionPattern = RegExp(
+      r"@\.(\w+)\s*(==|!=|>|<|>=|<=)\s*'([^']+)'",
     );
 
     String? prevCollection;
@@ -21,18 +27,29 @@ class VirtualHierarchyAnalyzer {
 
     for (final match in segmentPattern.allMatches(expression)) {
       final collection = match.group(1)!;
-      final isWildcard = match.group(2) != null;
-      final filterProperty = match.group(3);
-      final filterOperator = match.group(4);
-      final filterValue = match.group(5);
+      final filterContent = match.group(2);
 
+      final isWildcard = filterContent == '*';
       final filters = <FilterExpression>[];
-      if (!isWildcard && filterProperty != null && filterOperator != null) {
-        filters.add(FilterExpression(
-          property: filterProperty,
-          operator: filterOperator,
-          value: filterValue,
-        ));
+      var logicalOperator = FilterLogicalOperator.and;
+
+      if (!isWildcard && filterContent != null && filterContent.startsWith('?')) {
+        // Remove the leading '?' to get the filter expression
+        final filterExpr = filterContent.substring(1);
+
+        // Check if this is an OR expression
+        if (filterExpr.contains('||')) {
+          logicalOperator = FilterLogicalOperator.or;
+        }
+
+        // Parse all filter conditions (handles both single and OR'ed conditions)
+        for (final condMatch in filterConditionPattern.allMatches(filterExpr)) {
+          filters.add(FilterExpression(
+            property: condMatch.group(1)!,
+            operator: condMatch.group(2)!,
+            value: condMatch.group(3),
+          ));
+        }
       }
 
       // Only add if it's a known collection type
@@ -41,6 +58,7 @@ class VirtualHierarchyAnalyzer {
           collection: collection,
           parentCollection: prevCollection,
           filters: filters,
+          filterOperator: logicalOperator,
           depth: depth,
         ));
 
@@ -63,6 +81,7 @@ class VirtualHierarchyAnalyzer {
       'operators',
       'tasks',
       'users',
+      'projectDocuments',
     ].contains(key);
   }
 }

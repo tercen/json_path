@@ -1,6 +1,7 @@
 import 'package:tercen_json_path/src/json_path_match.dart';
 import 'package:tercen_json_path/src/json_path_parser.dart';
 import 'package:tercen_json_path/src/ref_id_resolver.dart';
+import 'package:tercen_json_path/src/virtual_property_resolver.dart';
 
 /// A parsed JSONPath expression which can be applied to a JSON document.
 abstract interface class JsonPath {
@@ -11,8 +12,20 @@ abstract interface class JsonPath {
   ///
   /// Optional [resolver] parameter enables @ dereferencing syntax.
   /// If not provided, @ expressions will be parsed but dereferencing will be skipped.
-  factory JsonPath(String expression, {RefIdResolver? resolver}) =>
-      JsonPathParser().parse(expression, resolver: resolver);
+  ///
+  /// Optional [virtualPropertyResolver] parameter enables computed properties
+  /// like `parentSteps`, `childSteps`, `ancestorSteps`, `descendantSteps` for
+  /// navigating step relationships within Workflow documents.
+  factory JsonPath(
+    String expression, {
+    RefIdResolver? resolver,
+    VirtualPropertyResolver? virtualPropertyResolver,
+  }) =>
+      JsonPathParser().parse(
+        expression,
+        resolver: resolver,
+        virtualPropertyResolver: virtualPropertyResolver,
+      );
 
   /// Reads the given [json] object returning a Stream of all matches found.
   Stream<JsonPathMatch> read(dynamic json);

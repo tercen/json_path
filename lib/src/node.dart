@@ -1,5 +1,6 @@
 import 'package:tercen_json_path/src/grammar/slice_indices.dart';
 import 'package:tercen_json_path/src/virtual_hierarchy_resolver.dart';
+import 'package:tercen_json_path/src/virtual_property_resolver.dart';
 
 /// A JSON document node.
 class Node<T extends Object?> {
@@ -8,11 +9,13 @@ class Node<T extends Object?> {
     this.value, {
     VirtualHierarchyResolver? resolver,
     VirtualHierarchyContext? context,
+    VirtualPropertyResolver? virtualPropertyResolver,
   })  : parent = null,
         key = null,
         index = null,
         _resolver = resolver,
-        _context = context;
+        _context = context,
+        _virtualPropertyResolver = virtualPropertyResolver;
 
   /// Creates an instance of a child node.
   Node._(
@@ -22,8 +25,11 @@ class Node<T extends Object?> {
     this.index,
     VirtualHierarchyResolver? resolver,
     VirtualHierarchyContext? context,
+    VirtualPropertyResolver? virtualPropertyResolver,
   })  : _resolver = resolver ?? parent?._resolver,
-        _context = context ?? parent?._context;
+        _context = context ?? parent?._context,
+        _virtualPropertyResolver =
+            virtualPropertyResolver ?? parent?._virtualPropertyResolver;
 
   /// The node value.
   final T value;
@@ -36,6 +42,9 @@ class Node<T extends Object?> {
 
   /// Context for virtual hierarchy resolution
   final VirtualHierarchyContext? _context;
+
+  /// Virtual property resolver for computed properties
+  final VirtualPropertyResolver? _virtualPropertyResolver;
 
   /// The root node of the entire document.
   Node get root => parent?.root ?? this;
@@ -99,7 +108,24 @@ class Node<T extends Object?> {
     // Try to get from existing data first (fast path)
     if (v is Map && v.containsKey(key)) return _child(v, key);
 
-    // Try virtual collection resolution (slow path)
+    // Try virtual property resolution (computed properties within document)
+    if (_virtualPropertyResolver != null &&
+        v is Map<String, dynamic> &&
+        _virtualPropertyResolver!.isVirtualProperty(key)) {
+      final rootValue = root.value;
+      if (rootValue is Map<String, dynamic>) {
+        final resolved = await _virtualPropertyResolver!.resolveProperty(
+          v,
+          rootValue,
+          key,
+        );
+        if (resolved != null) {
+          return _createVirtualChild(key, resolved);
+        }
+      }
+    }
+
+    // Try virtual collection resolution (external documents)
     if (_resolver != null && _isVirtualCollection(key)) {
       final context = VirtualHierarchyContext(
         parentCollection: _inferCollectionFromNode(),
@@ -123,6 +149,7 @@ class Node<T extends Object?> {
         index: index,
         resolver: _resolver,
         context: _context,
+        virtualPropertyResolver: _virtualPropertyResolver,
       );
 
   Node _child(Map map, String key) => Node._(
@@ -131,6 +158,7 @@ class Node<T extends Object?> {
         key: key,
         resolver: _resolver,
         context: _context,
+        virtualPropertyResolver: _virtualPropertyResolver,
       );
 
   /// Check if a key represents a virtual collection
@@ -145,6 +173,7 @@ class Node<T extends Object?> {
       'operators',
       'tasks',
       'users',
+      'projectDocuments',
     ].contains(key);
   }
 
@@ -218,12 +247,12 @@ class Node<T extends Object?> {
     return null;
   }
 
-  /// Create a virtual child node with fetched documents
-  Node _createVirtualChild(String key, List<Map<String, dynamic>> docs) {
-    // Inject the fetched documents into parent's value
+  /// Create a virtual child node with resolved data
+  Node _createVirtualChild(String key, dynamic resolvedValue) {
+    // Inject the resolved value into parent's value
     final parentValue = value as Map;
     final updatedValue = Map<String, dynamic>.from(parentValue);
-    updatedValue[key] = docs;
+    updatedValue[key] = resolvedValue;
 
     // Create a new node with updated value and return the child
     final updatedParent = Node._(
@@ -233,14 +262,16 @@ class Node<T extends Object?> {
       index: index,
       resolver: _resolver,
       context: _context,
+      virtualPropertyResolver: _virtualPropertyResolver,
     );
 
     return Node._(
-      docs,
+      resolvedValue,
       updatedParent,
       key: key,
       resolver: _resolver,
       context: _context,
+      virtualPropertyResolver: _virtualPropertyResolver,
     );
   }
 

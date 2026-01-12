@@ -5,6 +5,7 @@ import 'package:tercen_json_path/src/node_match.dart';
 import 'package:tercen_json_path/src/selector.dart';
 import 'package:tercen_json_path/src/virtual_hierarchy_resolver.dart';
 import 'package:tercen_json_path/src/virtual_hierarchy_plan.dart';
+import 'package:tercen_json_path/src/virtual_property_resolver.dart';
 
 /// Internal implementation of [JsonPath].
 class JsonPathInternal implements JsonPath {
@@ -13,6 +14,7 @@ class JsonPathInternal implements JsonPath {
     this.selector, {
     this.resolver,
     this.hierarchyPlan,
+    this.virtualPropertyResolver,
   });
 
   /// Selector
@@ -27,6 +29,9 @@ class JsonPathInternal implements JsonPath {
   /// Hierarchy plan for prefetching
   final VirtualHierarchyPlan? hierarchyPlan;
 
+  /// Virtual property resolver for computed properties
+  final VirtualPropertyResolver? virtualPropertyResolver;
+
   /// Reads the given [json] object returning a Stream of all matches found.
   @override
   Stream<JsonPathMatch> read(json) async* {
@@ -40,6 +45,7 @@ class JsonPathInternal implements JsonPath {
       json,
       resolver: resolver,
       context: VirtualHierarchyContext(),
+      virtualPropertyResolver: virtualPropertyResolver,
     );
 
     // Evaluate

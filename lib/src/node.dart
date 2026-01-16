@@ -174,6 +174,8 @@ class Node<T extends Object?> {
       'tasks',
       'users',
       'projectDocuments',
+      'objects',
+      'documents',
     ].contains(key);
   }
 

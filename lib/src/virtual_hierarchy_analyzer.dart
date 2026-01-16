@@ -82,6 +82,8 @@ class VirtualHierarchyAnalyzer {
       'tasks',
       'users',
       'projectDocuments',
+      'objects',
+      'documents',
     ].contains(key);
   }
 }

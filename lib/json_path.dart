@@ -11,3 +11,5 @@ export 'package:tercen_json_path/src/virtual_hierarchy_analyzer.dart';
 export 'package:tercen_json_path/src/virtual_hierarchy_resolver.dart';
 export 'package:tercen_json_path/src/virtual_property_resolver.dart';
 export 'package:tercen_json_path/src/step_graph_resolver.dart';
+export 'package:tercen_json_path/src/ast/json_path_ast.dart';
+export 'package:tercen_json_path/src/ast/json_path_ast_parser.dart';

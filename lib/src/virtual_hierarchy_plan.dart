@@ -16,6 +16,7 @@ class VirtualHierarchyPlan {
 enum FilterLogicalOperator {
   and, // All filters must match (default)
   or, // Any filter can match
+  single, // Only one filter condition
 }
 
 /// Represents one collection that needs to be fetched

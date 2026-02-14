@@ -21,6 +21,7 @@ class JsonPathAstGrammarDefinition
         _dereference(),
         _dotName(),
         _wildcardDot(),
+        _projection(),
         _recursion(),
         _bracketContent(),
       ].toChoiceParser().trim();
@@ -49,6 +50,16 @@ class JsonPathAstGrammarDefinition
   /// `.*`
   Parser<WildcardSegment> _wildcardDot() =>
       char('*').skip(before: char('.')).map2((_, pos) => WildcardSegment(pos));
+
+  /// `{name, kind, acl.owner}`
+  Parser<ProjectionSegment> _projection() {
+    final fieldPath =
+        _memberName().toList(char('.').trim()).map((parts) => parts.join('.'));
+    return fieldPath
+        .toList()
+        .skip(before: char('{'), after: char('}'))
+        .map2((paths, pos) => ProjectionSegment(paths, pos));
+  }
 
   /// `..inner`
   Parser<RecursionSegment> _recursion() => [

@@ -185,6 +185,44 @@ void main() {
     });
   });
 
+  group('projection', () {
+    test('simple projection', () {
+      final ast = parser.parse(r'$.teams[*]{name, kind}');
+      expect(ast.segments, hasLength(3));
+      final proj = ast.segments[2] as ProjectionSegment;
+      expect(proj.fieldPaths, ['name', 'kind']);
+    });
+
+    test('deep path projection', () {
+      final ast = parser.parse(r'$.docs[*]{acl.owner, name}');
+      expect(ast.segments, hasLength(3));
+      final proj = ast.segments[2] as ProjectionSegment;
+      expect(proj.fieldPaths, ['acl.owner', 'name']);
+    });
+
+    test('single field projection', () {
+      final ast = parser.parse(r'$.teams[*]{name}');
+      expect(ast.segments, hasLength(3));
+      final proj = ast.segments[2] as ProjectionSegment;
+      expect(proj.fieldPaths, ['name']);
+    });
+
+    test('three fields with deep paths', () {
+      final ast = parser.parse(r'$.teams[*]{name, acl.owner, acl.permissions}');
+      expect(ast.segments, hasLength(3));
+      final proj = ast.segments[2] as ProjectionSegment;
+      expect(proj.fieldPaths, ['name', 'acl.owner', 'acl.permissions']);
+    });
+
+    test('projection after filter', () {
+      final ast = parser.parse(r"$.teams[?@.active]{name, id}");
+      expect(ast.segments, hasLength(3));
+      expect(ast.segments[1], isA<FilterSegment>());
+      final proj = ast.segments[2] as ProjectionSegment;
+      expect(proj.fieldPaths, ['name', 'id']);
+    });
+  });
+
   group('recursion', () {
     test('recursive dot name', () {
       final ast = parser.parse(r'$..name');

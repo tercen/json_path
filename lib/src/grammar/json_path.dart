@@ -13,6 +13,7 @@ import 'package:tercen_json_path/src/grammar/fun_name.dart';
 import 'package:tercen_json_path/src/grammar/literal.dart';
 import 'package:tercen_json_path/src/grammar/negatable.dart';
 import 'package:tercen_json_path/src/grammar/parser_ext.dart';
+import 'package:tercen_json_path/src/grammar/projection_selector.dart';
 import 'package:tercen_json_path/src/grammar/select_all_recursively.dart';
 import 'package:tercen_json_path/src/grammar/sequence_selector.dart';
 import 'package:tercen_json_path/src/grammar/singular_segment_sequence.dart';
@@ -73,9 +74,22 @@ class JsonPathGrammarDefinition
     dereferenceParser(_resolver).skip(before: char('.')),
     dotName,
     wildcard.skip(before: char('.')),
+    ref0(_projection),
     ref0(_union),
     ref0(_recursion),
   ].toChoiceParser().trim();
+
+  Parser<Selector> _projection() {
+    final nameFirst = (char('_') | letter() |
+            range(String.fromCharCode(0x80), String.fromCharCode(0xFFFF)))
+        .plus()
+        .flatten();
+    final nameChar = digit() | nameFirst;
+    final rawName = (nameFirst & nameChar.star()).flatten();
+    final fieldPath = rawName.toList(char('.').trim()).map((parts) => parts.join('.'));
+    return fieldPath.toList().skip(before: char('{'), after: char('}'))
+        .map(projectionSelector);
+  }
 
   Parser<Selector> _union() =>
       _unionElement().toList().inBrackets().map(unionSelector);

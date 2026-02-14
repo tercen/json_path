@@ -153,3 +153,13 @@ class RecursionSegment extends JsonPathSegment {
   @override
   String toString() => 'Recursion($inner)';
 }
+
+/// Object projection: `{name, kind, acl.owner}`
+class ProjectionSegment extends JsonPathSegment {
+  final List<String> fieldPaths;
+
+  ProjectionSegment(this.fieldPaths, super.position);
+
+  @override
+  String toString() => 'Projection(${fieldPaths.join(', ')})';
+}

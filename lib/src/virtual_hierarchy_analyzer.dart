@@ -81,6 +81,7 @@ class VirtualHierarchyAnalyzer {
       'operators',
       'tasks',
       'users',
+      'activities',
       'projectDocuments',
       'objects',
       'documents',
